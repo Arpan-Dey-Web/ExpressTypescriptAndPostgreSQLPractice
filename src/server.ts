@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
 import path from 'path';
-dotenv.config({path:path.join(process.cwd(), ".env")})
+dotenv.config({ path: path.join(process.cwd(), ".env") })
 
 
 const app = express();
@@ -60,14 +60,51 @@ app.get('/', (req: Request, res: Response) => {
     res.send('Hello Next Level Developers!!!')
 })
 
-// app.post("/", (req: Request, res: Response) => {
-//     console.log(req);
-//     res.send(200).json({
-//         "sucess": true,
-//         "message": "api is working"
-//     })
 
-// })
+// user data post (name , email)
+app.post("/users", async (req: Request, res: Response) => {
+    const { name, email } = req.body;
+    try {
+        const result = await pool.query(`
+            INSERT INTO users (name,email) VALUES ($1, $2) RETURNING *
+            ` , [name, email])
+        console.log(result);
+        res.status(201).json({
+            sucess: true,
+            message: "Data inserted Sucessfully"
+        })
+    } catch (error: any) {
+        res.status(500).json({
+            sucess: false,
+            message: error.message
+        })
+
+
+    }
+
+})
+
+
+
+// get all users data
+app.get("/users", async (req: Request, res: Response) => {
+    try {
+        const result = await pool.query(`SELECT * FROM users`)
+        res.status(200).json({
+            sucess: true,
+            message: 'users retrived sucessfully',
+            data: result.rows
+        })
+    } catch (error: any) {
+        res.status(500).json({
+            sucess: false,
+            message: error.message
+        }
+        )
+    }
+
+
+})
 
 
 app.listen(port, () => {
