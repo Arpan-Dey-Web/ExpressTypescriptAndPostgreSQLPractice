@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { Pool } from 'pg';
+import { Pool, Result } from 'pg';
 import dotenv from 'dotenv';
 import path from 'path';
 dotenv.config({ path: path.join(process.cwd(), ".env") })
@@ -25,8 +25,12 @@ const pool = new Pool({
 })
 
 
+// <---------------------------------Database Table Create---------------------------------->
 
 const initDB = async () => {
+
+    // <---------------------------------User Table Create---------------------------------->
+
     await pool.query(`
         CREATE TABLE IF NOT EXISTS users(
         id SERIAL PRIMARY KEY,
@@ -39,6 +43,8 @@ const initDB = async () => {
         updated_at TIMESTAMP DEFAULT NOW()
         )
         `);
+
+    // <---------------------------------Todos Table Create---------------------------------->
 
     await pool.query(`
             CREATE TABLE IF NOT EXISTS todos(
@@ -105,6 +111,57 @@ app.get("/users", async (req: Request, res: Response) => {
 
 
 })
+
+
+// get single user data
+
+app.get("/user/:id", async (req: Request, res: Response) => {
+    const { id } = req.params;
+    try {
+        const result = await pool.query(`SELECT * FROM users WHERE id = $1`, [id])
+
+
+        console.log(result.rows);
+        if (result.rows.length === 0) {
+            res.status(404).json({
+                sucess: false,
+                message: 'user not found'
+            })
+        } else {
+
+            res.status(200).json({
+                sucess: true,
+                message: 'user found sucessfull',
+                data: result.rows[0]
+
+            })
+        }
+
+
+
+    } catch (error: any) {
+        res.status(500).json({ sucess: false, message: error.message })
+
+
+    }
+
+
+
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 app.listen(port, () => {
