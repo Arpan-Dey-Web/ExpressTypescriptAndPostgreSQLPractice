@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express, { Request, response, Response } from 'express';
 import { Pool, Result } from 'pg';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -205,6 +205,19 @@ app.post("/todos", async (req: Request, res: Response) => {
     }
 })
 
+
+// not found route 
+app.use((req: Request, res: Response) => {
+res.status(404).json(
+        {
+            sucessful: false,
+            message: "Route Not Found",
+            path: req.path
+        }
+    )
+
+
+})
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
