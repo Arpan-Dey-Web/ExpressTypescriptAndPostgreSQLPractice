@@ -119,8 +119,6 @@ app.get("/user/:id", async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
         const result = await pool.query(`SELECT * FROM users WHERE id = $1`, [id])
-
-
         console.log(result.rows);
         if (result.rows.length === 0) {
             res.status(404).json({
@@ -128,7 +126,6 @@ app.get("/user/:id", async (req: Request, res: Response) => {
                 message: 'user not found'
             })
         } else {
-
             res.status(200).json({
                 sucess: true,
                 message: 'user found sucessfull',
@@ -136,17 +133,33 @@ app.get("/user/:id", async (req: Request, res: Response) => {
 
             })
         }
-
-
-
     } catch (error: any) {
         res.status(500).json({ sucess: false, message: error.message })
 
 
     }
+})
 
 
+// update user data 
+app.put("/user/:id", async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { name, email } = req.body;
+    try {
+        const result = await pool.query(`
+            UPDATE users SET name=$1, email=$2 WHERE id = $3 RETURNING *
+            ` , [name, email, id])
 
+        if (result.rows.length === 0) {
+            res.status(404).json({ sucess: false, message: "user not found" })
+        } else {
+            res.status(200).json({ sucess: true, message: "User Updated Sucessfully", data: result.rows[0] })
+        }
+
+
+    } catch (error: any) {
+        res.status(404).json({ sucess: false, message: error.message })
+    }
 })
 
 
