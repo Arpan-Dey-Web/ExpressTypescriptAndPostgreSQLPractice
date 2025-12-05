@@ -9,7 +9,6 @@ const app = express();
 const port = 5000;
 
 
-console.log(process.env.CONNECTION_STR);
 //  <-----------------------MiddelWare------------------------> 
 
 // json diye j request gula asbe oigula direct parse korte parbe na tai  json e parse korar jonno   app.use(express.json()) use korte hobe
@@ -68,7 +67,7 @@ app.get('/', (req: Request, res: Response) => {
 
 
 // user data post (name , email)
-app.post("/users", async (req: Request, res: Response) => {
+app.post("/user", async (req: Request, res: Response) => {
     const { name, email } = req.body;
     try {
         const result = await pool.query(`
@@ -189,15 +188,22 @@ app.delete("/user/:id", async (req: Request, res: Response) => {
 })
 
 
+// Todos post
 
 
+app.post("/todos", async (req: Request, res: Response) => {
+    const { user_id, title } = req.body;
+    try {
+        const result = await pool.query(`INSERT INTO todos(user_id, title) VALUES($1, $2) RETURNING *`, [user_id, title]);
+        res.status(201).json({ sucess: true, message: "Todo Created ", data: result.rows[0] });
+    } catch (error: any) {
+        res.status(500).json({
+            sucess: false,
+            message: error.message
 
-
-
-
-
-
-
+        })
+    }
+})
 
 
 app.listen(port, () => {
