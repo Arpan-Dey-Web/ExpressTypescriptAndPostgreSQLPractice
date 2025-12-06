@@ -1,9 +1,10 @@
 import express, { Request, Response } from 'express';
-import initDB, { pool } from './config/db';
+import initDB  from './config/db';
 import config from './config';
 import logger from './middleware/logger';
 import { userRoutes } from './module/user/user.routes';
-import { userServices } from './module/user/user.service';
+import { todoRoutes } from './module/todo/todo.routes';
+import { authRoutes } from './module/auth/auth.routes';
 
 const app = express();
 const port = config.port;
@@ -26,33 +27,17 @@ app.get('/', logger, (req: Request, res: Response) => {
 })
 
 
-// user data post (name , email)
+// user data 
 app.use("/user", userRoutes)
 
-app.use("/todos",  )
+// todo data 
+app.use("/todos",todoRoutes)
 
 
+// auth routes
+app.use("/auth", authRoutes )
 
 
-
-
-
-// Todos post
-
-
-app.post("/todos", async (req: Request, res: Response) => {
-    const { user_id, title } = req.body;
-    try {
-        const result = await pool.query(`INSERT INTO todos(user_id, title) VALUES($1, $2) RETURNING *`, [user_id, title]);
-        res.status(201).json({ sucess: true, message: "Todo Created ", data: result.rows[0] });
-    } catch (error: any) {
-        res.status(500).json({
-            sucess: false,
-            message: error.message
-
-        })
-    }
-})
 
 
 // not found route 

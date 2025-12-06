@@ -1,11 +1,17 @@
 import { pool } from "../../config/db";
+import bcrypt from "bcryptjs";
+
+
+const createUser = async (payload: Record <string, unknown>) => {
+    const { name, email, password } = payload;
+    // password hasing via bycriptJs
+    const hasedPass = await bcrypt.hash(password as string , 10)
 
 
 
-const createUser = async (name: string, email: string) => {
     const result = await pool.query(
-        `INSERT INTO users(name, email) VALUES($1, $2) RETURNING *`,
-        [name, email]
+        `INSERT INTO users(name, email, password) VALUES($1, $2, $3) RETURNING *`,
+        [name, email, hasedPass]
     );
     return result;
 };
@@ -28,7 +34,7 @@ const updateUserData = async (name: string, email: string, id: string) => {
 }
 
 
-const deleteUserData = async (id : string ) => {
+const deleteUserData = async (id: string) => {
     const result = await pool.query(`DELETE FROM users WHERE id = $1`, [id])
     return result;
 }
